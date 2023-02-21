@@ -8,6 +8,8 @@ from PIL import ImageChops, ImageGrab
 '''
 If my army is near the enemy's base, choose cavalry to surprise them.
 '''
+
+
 def surprise_attack(allow_surprise, stage, opmove, grab_area=(1120, 800, 1200, 860)):
     if allow_surprise:
         img = ImageGrab.grab(grab_area)
@@ -25,14 +27,16 @@ def surprise_attack(allow_surprise, stage, opmove, grab_area=(1120, 800, 1200, 8
                         else:
                             return 11
                     else:
-                        return 14
-
+                        return 11
 
     return False
+
 
 '''
 If the enemy is near my base, choose High Lord to defense.
 '''
+
+
 def defense(grab_area=(720, 800, 930, 860)):
     img = ImageGrab.grab(grab_area)
     pixels = img.load()
@@ -48,6 +52,8 @@ def defense(grab_area=(720, 800, 930, 860)):
 '''
 Detect the shining part in the game UI, aka the opponet's choice.
 '''
+
+
 def detect_diff(grab_area=(1000, 880, 1600, 1030)):  # 左上点和右下点的坐标
     image_one = ImageGrab.grab(grab_area)
     time.sleep(0.01)
@@ -61,13 +67,14 @@ Get the opponent's army.
 '''
 # 标识出横坐标的范围，以便确定对方兵种
 pos_map = {(22, 90): 1,
-            (90, 158): 2,
-            (158, 226): 3,
-            (226, 294): 4,
-            (294, 362): 5,
-            (362, 430): 6,
-            (430, 498): 7,
-            (498, 566): 8}
+           (90, 158): 2,
+           (158, 226): 3,
+           (226, 294): 4,
+           (294, 362): 5,
+           (362, 430): 6,
+           (430, 498): 7,
+           (498, 566): 8}
+
 
 class CustomError(Exception):
     def __init__(self, ErrorInfo):
@@ -75,6 +82,7 @@ class CustomError(Exception):
 
     def __str__(self):
         return self.errorinfo
+
 
 def get_opponent_move(pos_map=pos_map):
     cut = detect_diff()
@@ -84,17 +92,17 @@ def get_opponent_move(pos_map=pos_map):
     y_all = []
     for x in range(width):
         for y in range(height):
-            if pixels[x, y][0]> 1:   # 找到变化框框的颜色，黄色且变化较为剧烈，则RGB红色几乎一定大于1
+            if pixels[x, y][0] > 1:   # 找到变化框框的颜色，黄色且变化较为剧烈，则RGB红色几乎一定大于1
                 x_all.append(x)
                 y_all.append(y)
-    
+
     # 最初的频闪会出现两处不同，此时不同的数据点较多，本次结果应当忽略
     if len(x_all) > 8500:
         raise CustomError('Ignored!')
-    
+
     x_mean = np.array(x_all).mean()
     y_mean = np.array(y_all).mean()
-    
+
     # 纵坐标以76为界
     if y_mean < 76:
         prefix = 0
@@ -105,34 +113,36 @@ def get_opponent_move(pos_map=pos_map):
         if x_mean > i[0] and x_mean < i[1]:
             suffix = pos_map[i]
             break
-    
+
     move = prefix + suffix
 
     return move
 
+
 '''
 Clicking to choose my army.
 '''
-area_map = {1: (395, 923), 
-            2: (461, 923), 
-            3: (527, 923), 
-            4: (593, 923), 
-            5: (659, 923), 
-            6: (725, 923), 
-            7: (791, 923), 
-            8: (857, 923), 
-            9: (395, 994), 
-            10: (461, 994), 
-            11: (527, 994), 
-            12: (593, 994), 
-            13: (659, 994), 
-            14: (725, 994), 
-            15: (791, 994), 
+area_map = {1: (395, 923),
+            2: (461, 923),
+            3: (527, 923),
+            4: (593, 923),
+            5: (659, 923),
+            6: (725, 923),
+            7: (791, 923),
+            8: (857, 923),
+            9: (395, 994),
+            10: (461, 994),
+            11: (527, 994),
+            12: (593, 994),
+            13: (659, 994),
+            14: (725, 994),
+            15: (791, 994),
             16: (857, 994)
             }
 
 
 pyautogui.PAUSE = 0.01  # Quicker clicks!
+
 
 def click_area(my_move, area_map=area_map):
     x, y = area_map[my_move]
