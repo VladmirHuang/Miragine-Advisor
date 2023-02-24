@@ -1,16 +1,14 @@
 import numpy as np
 import time
-import random
 
 import pyautogui
 from PIL import ImageChops, ImageGrab
 
-'''
-If my army is near the enemy's base, choose cavalry to surprise them.
-'''
-
 
 def surprise_attack(allow_surprise, stage, opmove, grab_area=(1120, 800, 1200, 860)):
+    '''
+    If my army is near the enemy's base, choose cavalry to surprise them.
+    '''
     if allow_surprise:
         img = ImageGrab.grab(grab_area)
         pixels = img.load()
@@ -20,9 +18,7 @@ def surprise_attack(allow_surprise, stage, opmove, grab_area=(1120, 800, 1200, 8
                 if pixels[x, y][0] >= 160:  # 我的兵是红色的，只要有一个杀入禁区我就派兵。如果对方出Lord，我就出High Lord。否则我出骑兵。
 
                     if stage == 0:
-                        if opmove >= 15:  # 对付Lord用Immortal。
-                            return 12
-                        elif opmove == 14 or opmove == 12:  # 对付Iron Knight和Immortal用Monk。
+                        if opmove >= 14 or opmove == 12:  # 对付Lord，Iron Knight和Immortal用Monk。
                             return 9
                         else:
                             return 11
@@ -32,12 +28,10 @@ def surprise_attack(allow_surprise, stage, opmove, grab_area=(1120, 800, 1200, 8
     return False
 
 
-'''
-If the enemy is near my base, choose High Lord to defense.
-'''
-
-
 def defense(grab_area=(720, 800, 930, 860)):
+    '''
+    If the enemy is near my base, choose High Lord to defense.
+    '''
     img = ImageGrab.grab(grab_area)
     pixels = img.load()
     width, height = img.size
@@ -49,12 +43,10 @@ def defense(grab_area=(720, 800, 930, 860)):
     return False
 
 
-'''
-Detect the shining part in the game UI, aka the opponet's choice.
-'''
-
-
 def detect_diff(grab_area=(1000, 880, 1600, 1030)):  # 左上点和右下点的坐标
+    '''
+    Detect the shining part in the game UI, aka the opponet's choice.
+    '''
     image_one = ImageGrab.grab(grab_area)
     time.sleep(0.01)
     image_two = ImageGrab.grab(grab_area)
@@ -62,10 +54,8 @@ def detect_diff(grab_area=(1000, 880, 1600, 1030)):  # 左上点和右下点的�
     return diff
 
 
-'''
-Get the opponent's army.
-'''
 # 标识出横坐标的范围，以便确定对方兵种
+# X coordinates of the areas of your opponent's soldiers (the blue army).
 pos_map = {(22, 90): 1,
            (90, 158): 2,
            (158, 226): 3,
@@ -85,6 +75,9 @@ class CustomError(Exception):
 
 
 def get_opponent_move(pos_map=pos_map):
+    '''
+    Get the opponent's army.
+    '''
     cut = detect_diff()
     pixels = cut.load()
     width, height = cut.size
@@ -100,10 +93,11 @@ def get_opponent_move(pos_map=pos_map):
     if len(x_all) > 8500:
         raise CustomError('Ignored!')
 
-    x_mean = np.array(x_all).mean()
-    y_mean = np.array(y_all).mean()
+    x_mean = np.mean(x_all)
+    y_mean = np.mean(y_all)
 
     # 纵坐标以76为界
+    # Y coordinates of the opponent's soldier is distinguished by 76. 
     if y_mean < 76:
         prefix = 0
     else:
@@ -118,10 +112,7 @@ def get_opponent_move(pos_map=pos_map):
 
     return move
 
-
-'''
-Clicking to choose my army.
-'''
+# Coordinates of the areas of your soldier (the red army).
 area_map = {1: (395, 923),
             2: (461, 923),
             3: (527, 923),
@@ -141,9 +132,13 @@ area_map = {1: (395, 923),
             }
 
 
-pyautogui.PAUSE = 0.01  # Quicker clicks!
+# Quicker clicks!
+pyautogui.PAUSE = 0.01
 
 
 def click_area(my_move, area_map=area_map):
+    '''
+    Clicking to choose my army.
+    '''
     x, y = area_map[my_move]
     pyautogui.click(x, y, clicks=1, interval=0.0, button='left', duration=0.0)

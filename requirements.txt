@@ -1,0 +1,4 @@
+numpy
+pandas
+pyautogui==0.9.53
+pillow==9.4.0

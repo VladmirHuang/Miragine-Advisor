@@ -1,13 +1,14 @@
 import pandas as pd
 import copy
 
+
 class Miragine:
 
     def __init__(self, path='./data/army_infos.csv'):
         df = pd.read_csv(path, index_col='position')
         self.positions = df.index.tolist()
         self.data = df.T.to_dict()
-    
+
     def decide_harm(self, left, right):
         """
         Decide the harm one soldier can cause to the enemy.
@@ -27,7 +28,7 @@ class Miragine:
         right_harm = right_harm * (1 + 0.8 * right['ismagic'])
 
         return left_harm, right_harm
-    
+
     def decide_time(self, left, right):
         """
         Decide how long a soldier can live under one enemy's attack.
@@ -50,11 +51,12 @@ class Miragine:
 
         left_coef = 1 / left[mode]
         right_coef = 1 / right[mode]
-        
-        score = (right_time * right_coef - left_time * left_coef) / (right_time * right_coef)
-        
+
+        score = (right_time * right_coef - left_time *
+                 left_coef) / (right_time * right_coef)
+
         return score
-    
+
     def select_best(self, army1=1, mode='money'):
         """
         Choose best army2 to defeat army1 by comparing the time they exist.
@@ -65,6 +67,8 @@ class Miragine:
         for army2 in pos:
             score = self.compare(army1, army2, mode)
             scores.append(score)
-        
-        res = pd.DataFrame({'pos': pos, 'score': scores}).sort_values('score', ascending=False).reset_index(drop=True)
+
+        res = pd.DataFrame({'pos': pos, 'score': scores}).sort_values(
+            'score', ascending=False).reset_index(drop=True)
+
         return res
